@@ -39,7 +39,8 @@ bool parsePath(int argc, char *argv[])
                 oPath = path.parent_path() / "output";
                 if (!fs::exists(oPath))
                     fs::create_directory(oPath);
-            }else
+            }
+            else
                 oPath = argv[2];
             if ((!fs::exists(oPath) || !fs::is_directory(oPath)))
             {
@@ -199,9 +200,6 @@ void directory(fs::path path)
             if (fileName.substr(fileName.size() - 5, 5) != ".java")
                 return;
             fileName = fileName.substr(0, fileName.size() - 5);
-            // check if the file is excluded
-            if (excludedFiles.find(fileName) != excludedFiles.end())
-                return;
             // add it to the local imports
             string importString = p.path().parent_path().string();
             importString = "import " + importString.substr(pathName.size() + 1, importString.size() - pathName.size() - 1);
@@ -212,8 +210,12 @@ void directory(fs::path path)
             // mark the import
             importsFromLocals[importString + ".*"] = true;
             importsFromLocals[importString + '.' + fileName] = true;
-            cout << "add to merge: " << p << endl;
-            mergeFile(p);
+            // check if the file is excluded
+            if (excludedFiles.find(fileName) == excludedFiles.end())
+            {
+                cout << "add to merge: " << p << endl;
+                mergeFile(p);
+            }
         }
     }
 }
