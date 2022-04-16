@@ -71,3 +71,5 @@ Output path: "C://project//javaTest//output"
 ```
 
 ### License
+
+[MIT](./LICENSE)
