@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <cstring>
 #include <string>
 #include <set>
 #include <unordered_map>
@@ -12,10 +11,10 @@ fs::path oPath;                                // output path
 fs::path path;                                 // input path
 string pathName;                               // input path name
 string mergedContent;                          // merged content
+string mergedName = "merged";                  // merged name
 unordered_map<string, bool> excludedFiles;     // excluded files
 unordered_map<string, bool> importsFromLocals; // imports from locals
 set<string> importsPaths;                      // imports paths
-
 bool parsePath(int argc, char *argv[])
 {
     if (argc > 1)
@@ -32,33 +31,47 @@ bool parsePath(int argc, char *argv[])
             cout << "Path is not a directory." << endl;
             return false;
         }
+        oPath = path.parent_path() / "output";
         if (argc > 2)
         {
-            if (strlen(argv[2]) == 1 && argv[2][0] == 'd')
+            // use -o to set output path, use -m to set merged name, use -e to set excluded files
+            for (int i = 2; i < argc; i++)
             {
-                oPath = path.parent_path() / "output";
-                if (!fs::exists(oPath))
-                    fs::create_directory(oPath);
-            }
-            else
-                oPath = argv[2];
-            if ((!fs::exists(oPath) || !fs::is_directory(oPath)))
-            {
-                cout << "Output path does not exist or is not a directory." << endl;
-                return false;
-            }
-            // exclude files
-            for (int i = 3; i < argc; i++)
-            {
-                excludedFiles[argv[i]] = true;
+                if (string(argv[i]) == "-o")
+                {
+                    if (i + 1 >= argc)
+                    {
+                        cout << "No output path." << endl;
+                        return false;
+                    }
+                    oPath = argv[++i];
+                }
+                else if (string(argv[i]) == "-m")
+                {
+                    if (i + 1 >= argc)
+                    {
+                        cout << "No merged name." << endl;
+                        return false;
+                    }
+                    mergedName = argv[++i];
+                }
+                else if (string(argv[i]) == "-e")
+                {
+                    int excludedFilesIndex = i + 1;
+                    if (excludedFilesIndex >= argc)
+                    {
+                        cout << "No excluded files." << endl;
+                        return false;
+                    }
+                    for (int j = excludedFilesIndex; j < argc; j++)
+                    {
+                        excludedFiles[argv[j]] = true;
+                    }
+                }
             }
         }
-        else
-        {
-            oPath = path.parent_path() / "output";
-            if (!fs::exists(oPath))
-                fs::create_directory(oPath);
-        }
+        if (!fs::exists(oPath))
+            fs::create_directory(oPath);
         return true;
     }
     return false;
@@ -107,7 +120,7 @@ void prompt()
         flag = true;
         while (flag)
         {
-            cout << "Enter a file path to exclude (press space to over): " << endl
+            cout << "Enter a file path to exclude (directly press enter to over): " << endl
                  << "> ";
             string input;
             getline(cin, input);
@@ -118,6 +131,16 @@ void prompt()
             }
             excludedFiles[input] = true;
         }
+    }
+    cout << "do you want to set the merged name? (y/n): " << endl
+         << "> ";
+    getline(cin, input);
+    if (input == "y" || input == "Y")
+    {
+        cout << "Enter the merged name: " << endl
+             << "> ";
+        getline(cin, input);
+        mergedName = input;
     }
 }
 
@@ -232,10 +255,10 @@ int main(int argc, char *argv[])
     for (auto str : importsPaths)
         if (importsFromLocals.find(str) == importsFromLocals.end())
             mergedContent = str + ";\n" + mergedContent;
-    mergedContent = "package merged;\n" + mergedContent;
+    mergedContent = "package " + mergedName + ";\n" + mergedContent;
     // save the merged content to the output file
     cout << "saved to: " << oPath << endl;
-    ofstream out(oPath / "merged.java", ios::ate);
+    ofstream out(oPath / (mergedName += ".java"), ios::ate);
     out << mergedContent;
     out.close();
     system("pause");

@@ -34,8 +34,14 @@ g++ -static -std=c++17 -o merger merger.cpp
 You can launch the tool with arguments in the command prompt:
 
 ```bash
-./merger [src path] [output path] [excluded filename]...
+./merger [src path] -o [output path] -m [output filename] -e [excluded filename1]...
 ```
+
+> -o sets the output path
+>
+> -m sets the output filename
+>
+> -e sets filenames(class names) to exclude
 
 examples:
 
@@ -44,14 +50,14 @@ examples:
 ```
 
 ```bash
-./merger "C://project//javaTest//src" "C://project//javaTest//merged" TestClassA
+./merger "C://project//javaTest//src" -o "C://project//javaTest//merged" -e TestClassA
 ```
 
 ```bash
-./merger "C://project//javaTest//src" d TestClassA TestClassB
+./merger "C://project//javaTest//src" -m homework -e TestClassA TestClassB
 ```
 
-Excluded filenames can be left out if you don't have any. Besides, it is allowed to skip the output path by typing "d" in replace of it when there are excluded files. You can also skip them two only offering the source path.
+Arguments "-o", "-m", "-e" are not necessary.
 
 ### Method 2. Setting up in the tool
 
@@ -61,15 +67,22 @@ In default, the output locates at an "output" folder in the parental path of the
 
 ```bash
 Enter a folder path to build the task:
-> C://project//javaTest//src
+> C:\project\javaTest\src
 Enter an output path:
 >
 any files to exclude? (y/n):
->
-Path: "C://project//javaTest//src"
-Output path: "C://project//javaTest//output"
+> n
+do you want to set the merged name? (y/n):
+> y
+Enter the merged name:
+> homework
+Path: "C:\\project\\javaTest\\src"
+Output path: "C:\\project\\javaTest\\output"
+add to merge: "C:\\project\\javaTest\\src\\testClassA" 
+add to merge: "C:\\project\\javaTest\\src\\Main" 
+saved to: "C:\\project\\javaTest\\output"
 ```
 
-### License
+## License
 
 [MIT](./LICENSE)
