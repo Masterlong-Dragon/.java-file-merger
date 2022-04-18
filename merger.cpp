@@ -225,14 +225,16 @@ void directory(fs::path path)
             fileName = fileName.substr(0, fileName.size() - 5);
             // add it to the local imports
             string importString = p.path().parent_path().string();
-            importString = "import " + importString.substr(pathName.size() + 1, importString.size() - pathName.size() - 1);
+            size_t off = pathName.size() + 1;
+            size_t count = importString.size() - pathName.size() - 1;
+            importString = "import " + (count != (size_t)(-1) ? importString.substr(off, count) : "") + ".";
             // change it as the java import format
             for (auto &c : importString)
                 if (c == '\\' || c == '/')
                     c = '.';
             // mark the import
-            importsFromLocals[importString + ".*"] = true;
-            importsFromLocals[importString + '.' + fileName] = true;
+            importsFromLocals[importString + "*"] = true;
+            importsFromLocals[importString + fileName] = true;
             // check if the file is excluded
             if (excludedFiles.find(fileName) == excludedFiles.end())
             {
